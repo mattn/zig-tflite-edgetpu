@@ -14,11 +14,12 @@ pub const DeviceType = enum(c_uint) {
 
 pub const Device = struct {
     deviceType: DeviceType,
-    path: []const u8,
+    path: [*c]const u8,
 };
 
-pub fn EdgeTPU(device: Device) *c.TfLiteDelegate {
-    return c.edgetpu_create_delegate(@intCast(c_uint, @enumToInt(device.deviceType)), @ptrCast([*c]const u8, device.path), null, 0);
+pub fn EdgeTPU(device: Device, verbose: i32) *c.TfLiteDelegate {
+    c.edgetpu_verbosity(verbose);
+    return c.edgetpu_create_delegate(@intCast(c_uint, @enumToInt(device.deviceType)), device.path, null, 0);
 }
 
 pub fn listDevices(devices: *std.ArrayList(Device)) !void {
@@ -36,7 +37,7 @@ pub fn listDevices(devices: *std.ArrayList(Device)) !void {
 
     var devlist = @ptrCast([*]c.edgetpu_device, @alignCast(@alignOf(c.edgetpu_device), list))[0..numDevices];
     for (devlist) |item| {
-        try devices.append(Device{ .deviceType = @intToEnum(DeviceType, item.type), .path = item.path[0..64] });
+        try devices.append(Device{ .deviceType = @intToEnum(DeviceType, item.type), .path = item.path });
     }
 }
 
@@ -49,6 +50,6 @@ test "test delegate" {
     try listDevices(&devices);
 
     if (devices.items.len > 0) {
-        _ = EdgeTPU(devices.items[0]);
+        _ = EdgeTPU(devices.items[0], 0);
     }
 }
