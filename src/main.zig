@@ -34,9 +34,9 @@ pub fn listDevices(devices: *std.ArrayList(Device)) !void {
         return error.RuntimeError;
     }
 
-    var i: usize = 0;
-    while (i < numDevices) : (i += 1) {
-        try devices.append(Device{ .deviceType = DeviceType.TypeApexUSB, .path = "" });
+    var devlist = @ptrCast([*]c.edgetpu_device, @alignCast(@alignOf(c.edgetpu_device), list))[0..numDevices];
+    for (devlist) |item| {
+        try devices.append(Device{ .deviceType = @intToEnum(DeviceType, item.type), .path = item.path[0..64] });
     }
 }
 
