@@ -6,13 +6,13 @@ const c = @cImport({
     @cInclude("string.h");
 });
 
-const DeviceType = enum(c_uint) {
+pub const DeviceType = enum(c_uint) {
     // The Device Types
     TypeApexPCI = c.EDGETPU_APEX_PCI,
     TypeApexUSB = c.EDGETPU_APEX_USB,
 };
 
-const Device = struct {
+pub const Device = struct {
     deviceType: DeviceType,
     path: []const u8,
 };
